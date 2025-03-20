@@ -13,7 +13,7 @@ class Command(BaseCommand):
         fake = Faker()
         categories = ["Computers", "Phones", "Tablets", "Laptops", "VRs"]
         categories_objects = [
-            Category.objects.get_or_create(name=c) for c in categories
+            Category.objects.get_or_create(name=c)[0] for c in categories
         ]
 
         Product.objects.all().delete()
@@ -21,7 +21,8 @@ class Command(BaseCommand):
         for _ in range(50):
             Product.objects.create(
                 name=fake.word().capitalize(),
-                category=random.choice(categories, nomenclature=fake.unique.uuid4()),
+                category=random.choice(categories_objects),
+                nomenclature=fake.unique.uuid4(),
                 description=fake.text(max_nb_chars=100),
                 price=random.randint(1, 100),
                 discount=random.randint(0, 51),

@@ -20,6 +20,7 @@ class Product(models.Model):
     name = models.CharField(max_length=100)
     stock = models.PositiveIntegerField(default=0)
     price = models.DecimalField(max_digits=7, decimal_places=2)
+    description = models.TextField(null=True, blank=True)
     discount = models.IntegerField(default=0)
     available = models.BooleanField(default=True)
     category = models.ForeignKey(
