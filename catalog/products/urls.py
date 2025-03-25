@@ -18,9 +18,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
-from .views import index
+from .views import index, product_details
 
 
 app_name = "products"
 
-urlpatterns = [path("", index, name="index")]
+urlpatterns = [
+    path("", index, name="index"),
+    path("product/<int:product_id>/", product_details, name="product_details"),
+]

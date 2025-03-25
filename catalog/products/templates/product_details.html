@@ -1,15 +1,19 @@
 {% extends 'base.html' %} {% load math_filters %} {% block content %}
-<h1>Catalog of Products</h1>
-<div class="row row-cols-1 row-cols-md3 g-4">
-  {% for product in products %}
-  <div class="col">
-    <div class="card h-100 shadow-sm">
+<div class="" container my-3>
+  <div class="row">
+    <div class="col-md-6">
       <img
         src="{{ product.image_path|default:'https://i0.wp.com/junilearning.com/wp-content/uploads/2020/06/python-programming-language.webp?fit=800%2C800&ssl=1' }}"
-        alt="{{product.name}}"
-        class="card-img-top"
-        style="width: 50px; height: 50px"
+        alt=""
       />
+    </div>
+    <div class="col-md-6">
+      <h5>{{ product.name }}</h5>
+      {% if product.description %}
+      <p>Descripion: {{ product.description }}</p>
+        
+      {% endif %}
+      <p>Category: {{ product.category.name }}</p>
       <div class="product-rating">
         {% for i in "12345" %} {% if forloop.counter <= product.rating %}
         <i class="bi bi-star-fill text-warning"></i>
@@ -17,9 +21,7 @@
         <i class="bi bi-star text-muted"></i>
         {% endif %} {% endfor %}
       </div>
-      <div class="card-body">
-        <h5 class="card-title">{{product.name}}</h5>
-      </div>
+      <
       {% if product.discount %}
       <span class="text-success">
         ${{ product.price|calculate_discount:product.discount}}
@@ -31,12 +33,9 @@
       {% else %}
       <span class="text-success"> ${{product.price}} </span>
       {% endif %}
-      <a
-        class="btn btn-primary stretched-link"
-        href="{% url 'products:product_details' product.id %}"
-      ></a>
     </div>
   </div>
-  {% endfor %}
+    </div>
+  </div>
 </div>
 {% endblock %}
