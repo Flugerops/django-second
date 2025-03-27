@@ -1,42 +1,48 @@
 {% extends 'base.html' %} {% load math_filters %} {% block content %}
-<h1>Catalog of Products</h1>
-<div class="row row-cols-1 row-cols-md3 g-4">
-  {% for product in products %}
-  <div class="col">
-    <div class="card h-100 shadow-sm">
-      <img
-        src="{{ product.image_path|default:'https://i0.wp.com/junilearning.com/wp-content/uploads/2020/06/python-programming-language.webp?fit=800%2C800&ssl=1' }}"
-        alt="{{product.name}}"
-        class="card-img-top"
-        style="width: 50px; height: 50px"
-      />
-      <div class="product-rating">
-        {% for i in "12345" %} {% if forloop.counter <= product.rating %}
-        <i class="bi bi-star-fill text-warning"></i>
-        {% else %}
-        <i class="bi bi-star text-muted"></i>
-        {% endif %} {% endfor %}
+<div class="container mt-3">
+  <h1 class='text-center'>Catalog of products</h1>
+  <div class="row row-cols-1 row-cols-md-3 g-4">
+    {% for product in products %}
+    <div class="col">
+      <div class="card h-100 shadow-sm">
+        <img
+          src="{{product.image_path|default:'https://assets.turbologo.com/blog/en/2021/09/10094210/product-photo-1.png'}}"
+          alt="{{product.name}}"
+          class="card-img-top"
+          style="width: 100px; height: 100px"
+        />
+        <div class="card-body">
+          <h5 class="card-title">{{ product.name }}</h5>
+          {% if product.discount %}
+          <span class="text-success">
+            ${{ product.price|calculate_discount:product.discount }}
+          </span>
+          <span class="text-muted text-decoration-line-through">
+            ${{ product.price }}
+          </span>
+          {% else %}
+          <span class="text-success"> ${{ product.price }} </span>
+          {% endif %}
+          <div class="product-rating">
+            {% for i in "12345" %} {% if forloop.counter <= product.rating %}
+            <i class="bi bi-star-fill text-warning"></i>
+            {% else %}
+            <i class="bi bi-star text-muted"></i>
+            {% endif %} {% endfor %}
+          </div>
+          {% if not product.available %}
+          <small class="text-muted"> Not available </small>
+          {% endif %}
+          <a
+            href="{% url 'products:product_details' product.id%}"
+            class="btn-primary"
+            >More</a
+          >
+        </div>
       </div>
-      <div class="card-body">
-        <h5 class="card-title">{{product.name}}</h5>
-      </div>
-      {% if product.discount %}
-      <span class="text-success">
-        ${{ product.price|calculate_discount:product.discount}}
-      </span>
-      <span class="text-muted text-decoration-line-through">
-        ${{product.price}}
-      </span>
-
-      {% else %}
-      <span class="text-success"> ${{product.price}} </span>
-      {% endif %}
-      <a
-        class="btn btn-primary stretched-link"
-        href="{% url 'products:product_details' product.id %}"
-      ></a>
     </div>
+    {% endfor %}
   </div>
-  {% endfor %}
+  {% endblock %}
 </div>
-{% endblock %}
+</div>

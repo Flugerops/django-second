@@ -10,8 +10,12 @@ def index(request):
     products = Product.objects.all()
     category_name = request.GET.get("category")
     filter_name = request.GET.get("filter")
+    product_name = request.GET.get("search")
 
     categories = Category.objects.all()
+
+    if product_name:
+        products = products.filter(name__icontains=product_name)
 
     if category_name:
         category = Category.objects.get(name=category_name)
@@ -20,6 +24,7 @@ def index(request):
     match filter_name:
         case "price_increase":
             products = products.order_by("price")
+
         case "price_decrease":
             products = products.order_by("-price")
         case "rating_increase":
