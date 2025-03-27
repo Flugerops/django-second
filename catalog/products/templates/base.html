@@ -19,26 +19,21 @@
       <nav class="navbar navber-dark bg-dark fixed-top">
         <div class="container">
           <div class="nav-item">
-            <form
-              action="{% url 'products:index'   %}"
-              method="GET"
-              class="d-flex mx-auto"
-            ></form>
-              <select name="category" class="form-select me-3" onchange="this.form.submit()" > 
-              <option value="" > Category </option> 
-              {% for category in categories %}
-                <option value="{{ category.name }}"> {{ category.name }} </option>
-              {% endfor %}
-              
+            <form action="{% url 'products:index' %}" method="GET" class="d-flex mx-auto">
+              <select name="category" class="form-select me-3" onchange="this.form.submit()"> 
+                  <option value=""> Category </option> 
+                  {% for category in categories %}
+                      <option value="{{ category.name }}"> {{ category.name }} </option>
+                  {% endfor %}
               </select>
               <select name="filter" class="form-select me-3" onchange="this.form.submit()">
-                <option value=""> Filter </option>
-                <option value="price_increase"> Increasing price </option>
-                <option value="price_decrease"> Decreasing price </option>
-                <option value="rating_increase"> Increasing rating </option>
-                <option value="rating_decrease"> Decreasing rating </option>
+                  <option value=""> Filter </option>
+                  <option value="price_increase"> Increasing price </option>
+                  <option value="price_decrease"> Decreasing price </option>
+                  <option value="rating_increase"> Increasing rating </option>
+                  <option value="rating_decrease"> Decreasing rating </option>
               </select>
-            </form>
+          </form>
           </div>
           <a href="{% url 'products:index' %}" class="navbar-brand">Home</a>
         </div>
