@@ -24,7 +24,7 @@ content %}
     <div class="col">
       <div class="card h-100 shadow-sm">
         <img
-          src="{{ product.image_path|default: static('static/images/dimon.jpg') }}"
+          src="{% if product.image_path %}{{ product.image_path }}{% else %}{% static 'products/images/dimon.jpg' %}{% endif %}"
           alt="{{ product.name }}"
           class="card-img-top"
           style="
