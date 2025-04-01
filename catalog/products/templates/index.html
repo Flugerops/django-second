@@ -1,16 +1,40 @@
-{% extends 'base.html' %} {% load math_filters %} {% block content %}
-<div class="container mt-3">
-  <h1 class='text-center'>Catalog of products</h1>
+{% extends 'base.html' %} {% load math_filters %} {% load static %} {% block
+content %}
+<div class="container">
+  <br />
+  <br />
+  <h1 class="text-center">Catalog of products</h1>
   <div class="row row-cols-1 row-cols-md-3 g-4">
-    {% for product in products %}
+    {% if products_count > 0 %}
+    <p
+      class="text-center"
+      style="font-size: 1.2rem; font-weight: bold; color: #28a745"
+    >
+      <i class="bi bi-check-circle-fill"></i> Found {{ products_count }}
+      products
+    </p>
+    {% else %}
+    <p
+      class="text-center"
+      style="font-size: 1.2rem; font-weight: bold; color: #dc3545"
+    >
+      <i class="bi bi-x-circle-fill"></i> No products available
+    </p>
+    {% endif %} {% for product in products %}
     <div class="col">
       <div class="card h-100 shadow-sm">
         <img
-          src="{{product.image_path|default:'https://assets.turbologo.com/blog/en/2021/09/10094210/product-photo-1.png'}}"
-          alt="{{product.name}}"
+          src="{{ product.image_path|default: static('static/images/dimon.jpg') }}"
+          alt="{{ product.name }}"
           class="card-img-top"
-          style="width: 100px; height: 100px"
+          style="
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 10px;
+          "
         />
+
         <div class="card-body">
           <h5 class="card-title">{{ product.name }}</h5>
           {% if product.discount %}
@@ -33,9 +57,10 @@
           {% if not product.available %}
           <small class="text-muted"> Not available </small>
           {% endif %}
+          <br />
           <a
             href="{% url 'products:product_details' product.id%}"
-            class="btn-primary"
+            class="btn btn-primary"
             >More</a
           >
         </div>
@@ -43,6 +68,5 @@
     </div>
     {% endfor %}
   </div>
-  {% endblock %}
 </div>
-</div>
+{% endblock %}

@@ -1,30 +1,53 @@
+from datetime import datetime
+
 from django.shortcuts import render, get_object_or_404
+from django.utils.timezone import make_aware
 
 from .models import Product, Category
 
 
-# Create your views here.
-
-
 def index(request):
     products = Product.objects.all()
+
     category_name = request.GET.get("category")
     filter_name = request.GET.get("filter")
     product_name = request.GET.get("search")
+    min_price = request.GET.get("min_price")
+    max_price = request.GET.get("max_price")
+    start_date = request.GET.get("start_date")
+    end_date = request.GET.get("end_date")
 
     categories = Category.objects.all()
 
     if product_name:
         products = products.filter(name__icontains=product_name)
 
+    if min_price:
+        products = products.filter(price__gte=min_price)
+
+    if max_price:
+        products = products.filter(price__lte=max_price)
+
     if category_name:
         category = Category.objects.get(name=category_name)
         products = products.filter(category=category)
 
+    if start_date:
+        start_date = make_aware(datetime.strptime(start_date, "%Y-%m-%dT%H:%M")).date()
+
+    if end_date:
+        end_date = make_aware(datetime.strptime(end_date, "%Y-%m-%dT%H:%M")).date()
+
+    if start_date and end_date:
+        products = products.filter(created_at__date__range=(start_date, end_date))
+    elif start_date:
+        products = products.filter(created_at__date=start_date)
+    elif end_date:
+        products = products.filter(created_at__date=end_date)
+
     match filter_name:
         case "price_increase":
             products = products.order_by("price")
-
         case "price_decrease":
             products = products.order_by("-price")
         case "rating_increase":
@@ -32,9 +55,14 @@ def index(request):
         case "rating_decrease":
             products = products.order_by("-rating")
 
-    return render(
-        request, "index.html", context={"products": products, "categories": categories}
-    )
+    products_count = products.count()
+
+    context = {
+        "products": products,
+        "categories": categories,
+        "products_count": products_count,
+    }
+    return render(request, "index.html", context=context)
 
 
 def product_details(request, product_id):
