@@ -1,5 +1,6 @@
-{% extends 'base.html' %} {% load math_filters %} {% load static %} {% block
-content %}
+{% extends 'base.html' %} {% load math_filters %} {% load static %} 
+
+{% block content %}
 <div class="container">
   <br />
   <br />
@@ -24,7 +25,8 @@ content %}
     <div class="col">
       <div class="card h-100 shadow-sm">
         <img
-          src="{% if product.image_path %}{{ product.image_path }}{% else %}{% static 'products/images/dimon.jpg' %}{% endif %}"
+          src="{% if product.image_path %}{{ product.image_path }}{% else %}{% static 'images/dimon.jpg' %}
+          {% endif %}"
           alt="{{ product.name }}"
           class="card-img-top"
           style="
