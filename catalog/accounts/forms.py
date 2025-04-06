@@ -12,4 +12,4 @@ class RegisterForm(UserCreationForm):
     class Meta:
         model = User
         extra_fields = ["email"]
-        fields = ["username", "password1", "password2"]
+        fields = ["username", "password1", "password2", "email"]
