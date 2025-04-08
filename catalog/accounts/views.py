@@ -3,6 +3,7 @@ from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 
 from .forms import RegisterForm
+from .models import Profile
 
 
 def register(request):
@@ -40,4 +41,5 @@ def logout_view(request):
 
 @login_required
 def profile(request):
-    return render(request, "profile.html")
+    profile, _ = Profile.objects.get_or_create(user=request.user)
+    return render(request, "profile.html", {"profile": profile})

@@ -13,3 +13,15 @@ class RegisterForm(UserCreationForm):
         model = User
         extra_fields = ["email"]
         fields = ["username", "password1", "password2", "email"]
+
+
+class ProfileUpdateForm(forms.Form):
+    email = forms.EmailField(required=True, label="Email:")
+    avatar = forms.ImageField(required=False, label="Avatar:")
+
+    def clean_email(self):
+        new_email = self.cleaned_data.get("email")
+        if User.objects.filter(email=new_email).exists():
+            raise forms.ValidationError("This email already exists")
+        else:
+            return new_email
