@@ -12,7 +12,7 @@
     {% endif %}
 
     <form enctype="multipart/form-data" method="POST">
-        {% csrf_roken %}
+        {% csrf_token %}
         {{ form.as_p }}
         <input type="submit" value="Submit">
     </form>
