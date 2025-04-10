@@ -25,3 +25,9 @@ class ProfileUpdateForm(forms.Form):
             raise forms.ValidationError("This email already exists")
         else:
             return new_email
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop("user", None)
+        super().__init__(*args, **kwargs)
+        if self.user:
+            self.fields["email"].initial = self.user.email
