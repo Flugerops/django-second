@@ -8,6 +8,7 @@ from .views import (
     profile,
     edit_profile_view,
     confirm_email,
+    confirm_registration,
 )
 
 app_name = "accounts"
@@ -35,4 +36,5 @@ urlpatterns = [
         name="password_change_done",
     ),
     path("confirm_email", confirm_email, name="confirm_email"),
+    path("confirm_registration", confirm_registration, name="confirm_registration"),
 ]

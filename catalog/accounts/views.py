@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponseBadRequest
 from django.contrib.auth import login, authenticate, logout
-from django.contrib.messages.context_processors import messages
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
@@ -9,6 +9,7 @@ from django.urls import reverse
 
 from .forms import ProfileUpdateForm, RegisterForm
 from .models import Profile
+from .utils import send_confirmation_mail
 
 
 def register(request):
@@ -16,7 +17,7 @@ def register(request):
         form = RegisterForm(request.POST)
         if form.is_valid():
             user = form.save()
-            login(request, user)
+            send_confirmation_mail(request, user, user.email, "confirm_registration")
             return redirect("products:index")
     else:
         form = RegisterForm()
@@ -50,14 +51,17 @@ def edit_profile_view(request):
             # user.email = new_email
             # user.save()
             if new_email != user.email:
-                confirm_url = request.build_absolute_uri(reverse("confirm_email"))
-                confirm_url += f"?user={user.id}&email={new_email}"
-                subject = "Confirm new email"
-                message = f"Hello, {user.username} you want to change your email? Confirm your email on link: {confirm_url}"
-                send_mail(
-                    subject, message, "no-reply", [new_email], fail_silently=False
-                )
-                messages.info(request, "Confirmation email was send")
+                send_confirmation_mail(request, user, new_email, "confirm_email")
+                # confirm_url = request.build_absolute_uri(
+                #     reverse("accounts:confirm_email")
+                # )
+                # confirm_url += f"?user={user.id}&email={new_email}"
+                # subject = "Confirm new email"
+                # message = f"Hello, {user.username} you want to confirm your email? Confirm your email on link: {confirm_url}"
+                # send_mail(
+                #     subject, message, "no-reply", [new_email], fail_silently=False
+                # )
+                # messages.info(request, "Confirmation email was send")
 
             avatar = form.cleaned_data.get("avatar")
             if avatar:
@@ -99,4 +103,22 @@ def confirm_email(request):
     user.email = email
     user.save()
 
+    return render(request, "email_change_done.html", {"email": email})
+
+
+def confirm_registration(request):
+    user_id = request.GET.get("user")
+    email = request.GET.get("email")
+
+    if not user_id or not email:
+        return HttpResponseBadRequest("BAD REQUEST: No user or email")
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return HttpResponseBadRequest("BAD REQUEST: No user or email")
+
+    # if User.objects.filter(email=email).exists():
+    #     return HttpResponseBadRequest("This email already taken")
+
+    login(request, user)
     return render(request, "email_change_done.html", {"email": email})
