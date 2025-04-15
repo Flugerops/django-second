@@ -23,7 +23,7 @@ class RegisterForm(UserCreationForm):
 
 
 class ProfileUpdateForm(forms.Form):
-    email = forms.EmailField(required=True, label="Email:")
+    email = forms.EmailField(required=False, label="Email:")
     avatar = forms.ImageField(required=False, label="Avatar:")
 
     def clean_email(self):
