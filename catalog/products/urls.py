@@ -18,7 +18,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
-from .views import index, product_details
+from .views import index, product_details, cart_add, cart_detail_view
 
 
 app_name = "products"
@@ -26,4 +26,6 @@ app_name = "products"
 urlpatterns = [
     path("", index, name="index"),
     path("product/<int:product_id>/", product_details, name="product_details"),
+    path("cart_add/<int:product_id>", cart_add, name="cart_add"),
+    path("cart_detail/", cart_detail_view, name="cart_detail"),
 ]

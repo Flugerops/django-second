@@ -1,9 +1,10 @@
 from datetime import datetime
 
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import redirect, render, get_object_or_404
 from django.utils.timezone import make_aware
+from django.conf import settings
 
-from .models import Product, Category
+from .models import Product, Category, Cart, CartItem
 
 
 def index(request):
@@ -68,3 +69,55 @@ def index(request):
 def product_details(request, product_id):
     product = get_object_or_404(Product, id=product_id)
     return render(request, "product_details.html", {"product": product})
+
+
+def cart_add(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+    if not request.user.is_authenticated:
+        cart = request.session.get(settings.CART_SESSION_ID, {})
+        if cart.get(product_id):
+            cart[product_id] += 1
+        else:
+            cart[product_id] = 1
+        request.session[settings.CART_SESSION_ID] = cart
+        return redirect("products:cart_detail")
+    else:
+        cart = Cart.objects.get_or_create(user=request.user)
+        cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product)
+        if not created:
+            cart_item.amount += 1
+            cart_item.save()
+    return redirect("shop:cart_detail")
+
+
+def cart_detail_view(request):
+    if not request.user.is_authenticated:
+        cart = request.session.get(settings.CART_SESSION_ID, {})
+        product_ids = cart.keys()
+        products = Product.objects.filter(id__in=product_ids)
+        card_items = []
+        total_price = 0
+        for product in products:
+            count = cart[str(product.id)]
+            price = count * product.price
+            total_price += price
+            card_items.append({"product": product, "count": count, "price": price})
+    else:
+        try:
+            cart = request.user.cart
+
+        except Cart.DoesNotExist:
+            cart = None
+
+        if not cart or not cart.items.count():
+            cart_items = []
+            total_price = 0
+        else:
+            cart_items = cart.items.select_related
+            total_price = sum(item.product.price * item.amount for item in cart_items)
+
+    return render(
+        request,
+        "cart_detail.html",
+        {"card_items": card_items, "total_price": total_price},
+    )
