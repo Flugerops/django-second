@@ -1,10 +1,19 @@
 from datetime import datetime
 
 from django.shortcuts import redirect, render, get_object_or_404
+from django.contrib import messages
 from django.utils.timezone import make_aware
 from django.conf import settings
 
-from .models import Product, Category, Cart, CartItem
+from catalog.products.forms import OrderCreateForm
+from catalog.utils.email.email import send_order_confirmation_email
+
+from .models import Payment, Product, Category, Cart, CartItem, OrderItem, Order
+
+
+def calculate_discount(value, arg):
+    discount_value = value * arg / 100
+    return value - discount_value
 
 
 def index(request):
@@ -121,3 +130,65 @@ def cart_detail_view(request):
         "cart_detail.html",
         {"card_items": card_items, "total_price": total_price},
     )
+
+
+def checkout(request):
+    if (request.user.is_authenticated and not getattr(request.user, "cart", None)) or (
+        not request.user.is_authenticated
+        and not request.session.get(settings.CART_SESSION_ID)
+    ):
+        messages.error(request, "Cart is emplty")
+        return redirect("products:cart:detail")
+    if request.method == "GET":
+        form = OrderCreateForm()
+        if request.user.is_authenticated:
+            form.initial["contact_email"] = request.user.email
+    elif request.method == "POST":
+        form = OrderCreateForm(request.POST)
+        if form.is_valid():
+            order = form.save(commit=False)
+            if request.user.is_authenticated:
+                order.user = request.user
+            order.save()
+
+            if request.user.is_authenticated:
+                cart = getattr(request.user, "cart")
+                cart_items = cart.items.select_related("product")
+            else:
+                cart = request.session.get(settings.CART_SESSION_ID)
+                cart_items = []
+                for product_id, amount in cart.items():
+                    product = Product.objects.get(id=product_id)
+                    cart_items.append({"product": product, "amount": amount})
+            items = OrderItem.objects.bulk_create(
+                [
+                    OrderItem(
+                        order=order,
+                        product=item.product,
+                        amount=item.amount,
+                        price=calculate_discount(
+                            item.product.price, item.product.discount
+                        ),
+                    )
+                    for item in cart_items
+                ]
+            )
+
+            total_price = sum(item.product.price * item.amount for item in items)
+            method = form.cleaned_data.get("payment_method")
+            if method != "cash":
+                Payment.objects.create(order=order, provider=method, amount=total_price)
+            else:
+                order.status = 2
+
+            order.save()
+
+            if request.user.is_authenticated:
+                cart.items.all().delete()
+            else:
+                request.session[settings.CART_SESSION_ID] = {}
+            send_order_confirmation_email(order=order)
+            messages.success(request, "Text")
+            return redirect("products:index")
+
+    return render(request, "checkout.html", context={"form": form})
