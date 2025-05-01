@@ -22,7 +22,7 @@ class Product(models.Model):
     stock = models.PositiveIntegerField(default=0)
     price = models.DecimalField(max_digits=7, decimal_places=2)
     description = models.TextField(null=True, blank=True)
-    discount = models.IntegerField(default=0)
+    discount = models.IntegerField(default=0, max=100)
     available = models.BooleanField(default=True)
     category = models.ForeignKey(
         Category, on_delete=models.CASCADE, related_name="products"
@@ -36,6 +36,12 @@ class Product(models.Model):
     rating = models.FloatField(default=0.0)
     attributes = models.JSONField()
 
+    @property
+    def discount_price(self):
+        # discount_value = value * arg / 100
+        if self.discount:
+            return round(self.price - (self.price * self.discount / 100), 2)
+
     class Meta:
         ordering = ["-created_at"]
         db_table = "products"
@@ -43,23 +49,6 @@ class Product(models.Model):
 
     def __str__(self):
         return self.name, self.nomenclature
-
-
-class Cart(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="cart")
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def str(self):
-        return f"{self.user.username}'s cart "
-
-
-# class CartItem(models.Model):
-#     cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name="items")
-#     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-#     amount = models.PositiveIntegerField(default=1)
-
-#     def str(self):
-#         return f"{self.product.name ," : ", self.amount}"
 
 
 class Order(models.Model):
@@ -94,6 +83,14 @@ class OrderItem(models.Model):
 
     def __str__(self):
         return f"{self.order.id} : {self.product.name} : ${self.price}"
+
+
+class Cart(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="cart")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username}'s cart"
 
 
 class CartItem(models.Model):
